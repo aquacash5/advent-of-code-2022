@@ -12,6 +12,7 @@ use crate::create::create_day;
 #[derive(Parser, Debug)]
 #[command(author, about, long_about = None)]
 enum Cli {
+    /// Creates the scaffolding for the days packages
     Create {
         /// The day to run
         #[arg(value_parser = clap::value_parser!(u64).range(1..=25))]
