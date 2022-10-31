@@ -1,0 +1,15 @@
+[package]
+name = "xtask"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anyhow = "1.0.66"
+cargo = "0.65.0"
+clap = { version = "4.0.18", features = ["derive"] }
+env_logger = "0.9.1"
+indoc = "1.0.7"
+log = { version = "0.4.17", features = ["std"] }
+xshell = "0.2.2"

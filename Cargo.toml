@@ -1,2 +1,2 @@
 [workspace]
-members = ["day-*", "make-tree"]
+members = ["day-*", "tree", "utils", "xtask"]
