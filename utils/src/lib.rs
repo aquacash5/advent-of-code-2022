@@ -43,7 +43,7 @@ impl ValueEnum for SolutionPart {
         &[Self::PartOne, Self::PartTwo, Self::Both]
     }
 
-    fn to_possible_value(&self) -> Option<clap::builder::PossibleValue> {
+    fn to_possible_value(&self) -> Option<PossibleValue> {
         use SolutionPart::*;
         match self {
             PartOne => Some(PossibleValue::new("1")),
