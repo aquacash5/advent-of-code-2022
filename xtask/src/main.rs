@@ -3,7 +3,7 @@ mod create;
 use cargo::{core::Workspace, Config};
 use clap::{builder::PossibleValue, Parser, ValueEnum};
 use log::trace;
-use std::path::Path;
+use std::{fmt::Display, path::Path};
 use xshell::{cmd, Shell};
 
 use crate::create::create_day;
@@ -52,6 +52,16 @@ enum SolutionPart {
     Both,
 }
 
+impl Display for SolutionPart {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::PartOne => write!(f, "1"),
+            Self::PartTwo => write!(f, "2"),
+            Self::Both => write!(f, "both"),
+        }
+    }
+}
+
 impl ValueEnum for SolutionPart {
     fn value_variants<'a>() -> &'a [Self] {
         &[Self::PartOne, Self::PartTwo, Self::Both]
@@ -94,8 +104,17 @@ fn main() -> anyhow::Result<()> {
         Cli::Create { day } => {
             create_day(day)?;
         }
-        Cli::Day { .. } => {
-            todo!();
+        Cli::Day { day, part } => {
+            let package = format!("day-{day}");
+            let path = Path::new(env!("CARGO_MANIFEST_DIR"))
+                .with_file_name(&package)
+                .join("input.txt");
+            let part = format!("{part}");
+            cmd!(
+                sh,
+                "cargo run --release --package {package} -- {path} -p {part}"
+            )
+            .run()?;
         }
         Cli::Tree => {
             cmd!(sh, "cargo run --release --package tree").run()?;
