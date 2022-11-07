@@ -59,12 +59,12 @@ fn create_new<P: AsRef<Path>>(path: P) -> io::Result<File> {
 
 pub fn create_day(day: u64) -> anyhow::Result<()> {
     let day_folder = format!("day-{day}");
-    let location = Path::new(env!("CARGO_MANIFEST_DIR")).with_file_name(&day_folder);
+    let location = Path::new(env!("CARGO_MANIFEST_DIR")).with_file_name(day_folder);
     debug!("New folder location: {}", location.display());
     fs::create_dir_all(location.join("src"))?;
     if let Ok(mut file) = create_new(location.join("Cargo.toml")) {
         println!("Creating Cargo.toml");
-        file.write(
+        file.write_all(
             CARGO_TOML_SCAFFOLDING
                 .replace("{DAY-NUMBER}", &day.to_string())
                 .as_bytes(),
@@ -74,7 +74,7 @@ pub fn create_day(day: u64) -> anyhow::Result<()> {
     }
     if let Ok(mut file) = create_new(location.join("src").join("main.rs")) {
         println!("Creating main.rs");
-        file.write(MAIN_SCAFFOLDING.as_bytes())?;
+        file.write_all(MAIN_SCAFFOLDING.as_bytes())?;
     } else {
         println!("main.rs exists");
     }
