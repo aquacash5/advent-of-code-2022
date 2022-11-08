@@ -1,7 +1,8 @@
 use console::style;
 
-const TREE: &str = "        |
-       \\|/
+const TREE: &str = r"
+        |
+       \|/
       --*--
        >o<
       >O<<<
@@ -11,7 +12,8 @@ const TREE: &str = "        |
   >o>>@>>>o>o<<
  >*>>*<o<@<o<<<<
 >o>o<<<O<*>>*>>O<
-   _ __| |__ _";
+   _ __| |__ _
+";
 const ORANGE: u8 = 166;
 
 fn main() {
