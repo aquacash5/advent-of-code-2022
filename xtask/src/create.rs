@@ -95,6 +95,7 @@ pub fn create_day(day: u64) -> anyhow::Result<()> {
             )
             .header(reqwest::header::COOKIE, format!("session={aoc_session}"))
             .send()?
+            .error_for_status()?
             .text()?;
         fs::write(location.join("input.txt"), input_data)?;
     } else {
