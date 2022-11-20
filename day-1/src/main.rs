@@ -1,3 +1,4 @@
+#[allow(clippy::wildcard_imports)]
 use utils::*;
 
 #[derive(Debug, PartialEq, Eq)]
@@ -16,6 +17,7 @@ fn parse(input: &str) -> ParseResult<InputData> {
     parse(input)
 }
 
+#[allow(clippy::unnecessary_wraps)]
 fn part1(input: &InputData) -> AocResult<usize> {
     Ok(input
         .depths
@@ -24,6 +26,7 @@ fn part1(input: &InputData) -> AocResult<usize> {
         .count())
 }
 
+#[allow(clippy::unnecessary_wraps)]
 fn part2(input: &InputData) -> AocResult<usize> {
     Ok(input
         .depths

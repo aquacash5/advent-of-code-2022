@@ -17,10 +17,17 @@ pub struct Cli {
 }
 
 impl Cli {
+    /// Reads input file and returns its content
+    ///
+    /// # Errors
+    ///
+    /// Check errors for [`std::fs::read_to_string`]
     pub fn input(&self) -> AocResult<String> {
         Ok(std::fs::read_to_string(&self.input_file)?)
     }
 
+    /// Determines if the part should run based on cli flags
+    #[must_use]
     pub fn should_run(&self, part: SolutionPart) -> bool {
         if self.part == SolutionPart::Both {
             true
@@ -44,28 +51,23 @@ impl ValueEnum for SolutionPart {
     }
 
     fn to_possible_value(&self) -> Option<PossibleValue> {
-        use SolutionPart::*;
         match self {
-            PartOne => Some(PossibleValue::new("1")),
-            PartTwo => Some(PossibleValue::new("2")),
-            Both => Some(PossibleValue::new("both")),
+            Self::PartOne => Some(PossibleValue::new("1")),
+            Self::PartTwo => Some(PossibleValue::new("2")),
+            Self::Both => Some(PossibleValue::new("both")),
         }
     }
 
     fn from_str(input: &str, ignore_case: bool) -> Result<Self, String> {
-        use SolutionPart::*;
         let mut input_new = input.to_string();
         if ignore_case {
             input_new = input_new.to_uppercase();
         }
-        if input_new == "1" {
-            Ok(PartOne)
-        } else if input_new == "2" {
-            Ok(PartTwo)
-        } else if input_new == "both" {
-            Ok(Both)
-        } else {
-            Err(format!("value {input} is not a valid <PART>"))
+        match input_new.as_str() {
+            "1" => Ok(Self::PartOne),
+            "2" => Ok(Self::PartTwo),
+            "both" => Ok(Self::Both),
+            _ => Err(format!("value {input} is not a valid <PART>")),
         }
     }
 }

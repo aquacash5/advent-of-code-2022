@@ -6,12 +6,15 @@ use log::trace;
 use std::{fmt::Display, path::Path};
 use xshell::{cmd, Shell};
 
-use crate::create::create_day;
+use crate::create::generate_day;
 
 /// Tasks to use and maintain this project
 #[derive(Parser, Debug)]
 #[command(author, about, long_about = None)]
 enum Cli {
+    /// Runs clippy on all projects
+    Clippy,
+
     /// Creates the scaffolding for the days packages
     Create {
         /// The day to run
@@ -68,26 +71,24 @@ impl ValueEnum for SolutionPart {
     }
 
     fn to_possible_value(&self) -> Option<clap::builder::PossibleValue> {
-        use SolutionPart::*;
         match self {
-            PartOne => Some(PossibleValue::new("1")),
-            PartTwo => Some(PossibleValue::new("2")),
-            Both => Some(PossibleValue::new("both")),
+            Self::PartOne => Some(PossibleValue::new("1")),
+            Self::PartTwo => Some(PossibleValue::new("2")),
+            Self::Both => Some(PossibleValue::new("both")),
         }
     }
 
     fn from_str(input: &str, ignore_case: bool) -> Result<Self, String> {
-        use SolutionPart::*;
         let mut input_new = input.to_string();
         if ignore_case {
             input_new = input_new.to_uppercase();
         }
         if input_new == "1" {
-            Ok(PartOne)
+            Ok(Self::PartOne)
         } else if input_new == "2" {
-            Ok(PartTwo)
+            Ok(Self::PartTwo)
         } else if input_new == "both" {
-            Ok(Both)
+            Ok(Self::Both)
         } else {
             Err(format!("value {input} is not a valid <PART>"))
         }
@@ -101,8 +102,15 @@ fn main() -> anyhow::Result<()> {
 
     let sh = Shell::new()?;
     match cli {
+        Cli::Clippy => {
+            cmd!(
+                sh,
+                "cargo clippy -- -W clippy::all -W clippy::pedantic -W clippy::nursery"
+            )
+            .run()?;
+        }
         Cli::Create { day } => {
-            create_day(day)?;
+            generate_day(day)?;
         }
         Cli::Day { day, part } => {
             let package = format!("day-{day}");
@@ -131,6 +139,7 @@ fn main() -> anyhow::Result<()> {
     Ok(())
 }
 
+/// Tests all of the Advent of Code projects in the workspace
 fn test_all(sh: &Shell) -> anyhow::Result<()> {
     // We expect CARGO_MANIFEST_DIR to be the directory of the
     // xtask package therefor calling `with_file_name` we replace

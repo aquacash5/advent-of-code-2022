@@ -20,10 +20,12 @@ fn parse(input: &str) -> ParseResult<InputData> {
     todo!()
 }
 
+#[allow(clippy::unnecessary_wraps)]
 fn part1(input: &InputData) -> AocResult<()> {
     Ok(())
 }
 
+#[allow(clippy::unnecessary_wraps)]
 fn part2(input: &InputData) -> AocResult<()> {
     Ok(())
 }
@@ -49,6 +51,7 @@ utils = { path = "../utils", version = "*" }
 
 "# };
 
+/// Only create file if path doesn't exist
 fn create_new<P: AsRef<Path>>(path: P) -> io::Result<File> {
     OpenOptions::new()
         .read(true)
@@ -57,7 +60,12 @@ fn create_new<P: AsRef<Path>>(path: P) -> io::Result<File> {
         .open(path.as_ref())
 }
 
-pub fn create_day(day: u64) -> anyhow::Result<()> {
+/// Generates the files for the new day
+///
+/// Scaffolds the project files for the new day of Advent of Code.
+/// Then, we try to download the input file using the session key
+/// in the `~/.adventofcode` file.
+pub fn generate_day(day: u64) -> anyhow::Result<()> {
     let day_folder = format!("day-{day}");
     let location = Path::new(env!("CARGO_MANIFEST_DIR")).with_file_name(day_folder);
     debug!("New folder location: {}", location.display());
@@ -78,7 +86,9 @@ pub fn create_day(day: u64) -> anyhow::Result<()> {
     } else {
         println!("main.rs exists");
     }
-    if !location.join("input.txt").exists() {
+    if location.join("input.txt").exists() {
+        println!("input.txt exists");
+    } else {
         println!("Creating input.txt");
         let aoc_session = read_to_string(
             dirs::home_dir()
@@ -98,8 +108,6 @@ pub fn create_day(day: u64) -> anyhow::Result<()> {
             .error_for_status()?
             .text()?;
         fs::write(location.join("input.txt"), input_data)?;
-    } else {
-        println!("input.txt exists");
     }
     Ok(())
 }
