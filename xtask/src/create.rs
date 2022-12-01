@@ -11,6 +11,7 @@ use std::{
 const AOC_YEAR: &str = "2022";
 
 const MAIN_SCAFFOLDING: &str = indoc! { r#"
+use itertools::Itertools;
 use utils::*;
 
 #[derive(Debug)]

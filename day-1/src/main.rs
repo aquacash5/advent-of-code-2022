@@ -1,7 +1,6 @@
 use std::cmp::Reverse;
 
 use itertools::Itertools;
-#[allow(clippy::wildcard_imports)]
 use utils::*;
 
 #[derive(Debug, PartialEq, Eq)]
