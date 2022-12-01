@@ -12,6 +12,7 @@ const AOC_YEAR: &str = "2022";
 
 const MAIN_SCAFFOLDING: &str = indoc! { r#"
 use itertools::Itertools;
+#[allow(clippy::wildcard_imports)]
 use utils::*;
 
 #[derive(Debug)]
