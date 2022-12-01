@@ -1,4 +1,6 @@
-use nom::sequence::tuple;
+use std::cmp::Reverse;
+
+use itertools::Itertools;
 #[allow(clippy::wildcard_imports)]
 use utils::*;
 
@@ -12,6 +14,7 @@ fn parse(input: &str) -> ParseResult<InputData> {
         character::complete::{i64, line_ending},
         combinator::map,
         multi::separated_list1,
+        sequence::tuple,
     };
     let elf = separated_list1(line_ending, i64);
     let elfs = separated_list1(tuple((line_ending, line_ending)), elf);
@@ -26,9 +29,13 @@ fn part1(input: &InputData) -> AocResult<i64> {
 
 #[allow(clippy::unnecessary_wraps)]
 fn part2(input: &InputData) -> AocResult<i64> {
-    let mut sorted_sums: Vec<i64> = input.elfs.iter().map(|v| v.iter().sum()).collect();
-    sorted_sums.sort_by(|a, b| b.cmp(a));
-    Ok(sorted_sums.iter().take(3).sum())
+    Ok(input
+        .elfs
+        .iter()
+        .map(|v| v.iter().sum::<i64>())
+        .sorted_by_key(|&s| Reverse(s))
+        .take(3)
+        .sum())
 }
 
 aoc_main!(parse, part1, part2);
