@@ -6,33 +6,42 @@ use utils::*;
 
 #[derive(Debug, PartialEq, Eq)]
 struct InputData {
-    elfs: Vec<Vec<i64>>,
+    elfs: Vec<Vec<u64>>,
 }
 
 fn parse(input: &str) -> ParseResult<InputData> {
     use nom::{
-        character::complete::{i64, line_ending},
+        character::complete::{line_ending, u64},
         combinator::map,
         multi::separated_list1,
         sequence::tuple,
     };
-    let elf = separated_list1(line_ending, i64);
+    let elf = separated_list1(line_ending, u64);
     let elfs = separated_list1(tuple((line_ending, line_ending)), elf);
     let mut parse = map(elfs, |elfs| InputData { elfs });
     parse(input)
 }
 
 #[allow(clippy::unnecessary_wraps)]
-fn part1(input: &InputData) -> AocResult<i64> {
-    Ok(input.elfs.iter().map(|v| v.iter().sum()).max().unwrap())
-}
-
-#[allow(clippy::unnecessary_wraps)]
-fn part2(input: &InputData) -> AocResult<i64> {
+fn part1(input: &InputData) -> AocResult<u64> {
     Ok(input
         .elfs
         .iter()
-        .map(|v| v.iter().sum::<i64>())
+        // Sum all values
+        .map(|v| v.iter().sum())
+        // Find the max value
+        .max()
+        .unwrap())
+}
+
+#[allow(clippy::unnecessary_wraps)]
+fn part2(input: &InputData) -> AocResult<u64> {
+    Ok(input
+        .elfs
+        .iter()
+        // Sum all values
+        .map(|v| v.iter().sum::<u64>())
+        // Sort in reverse order
         .sorted_by_key(|&s| Reverse(s))
         .take(3)
         .sum())
