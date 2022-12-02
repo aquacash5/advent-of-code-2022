@@ -24,20 +24,11 @@ impl Move {
     fn rig(self, outcome: Outcome) -> Self {
         use Move::*;
         use Outcome::*;
-        if outcome == Draw {
-            self
-        } else if outcome == Lose {
-            match self {
-                Rock => Scissors,
-                Paper => Rock,
-                Scissors => Paper,
-            }
-        } else {
-            match self {
-                Rock => Paper,
-                Paper => Scissors,
-                Scissors => Rock,
-            }
+        match (outcome, self) {
+            (Draw, _) => self,
+            (Lose, Rock) | (Win, Paper) => Scissors,
+            (Lose, Paper) | (Win, Scissors) => Rock,
+            (Lose, Scissors) | (Win, Rock) => Paper,
         }
     }
 
@@ -45,12 +36,8 @@ impl Move {
         use Move::*;
         use Outcome::*;
         match (self, other) {
-            (Rock, Paper) => Lose,
-            (Paper, Rock) => Win,
-            (Paper, Scissors) => Lose,
-            (Scissors, Paper) => Win,
-            (Scissors, Rock) => Lose,
-            (Rock, Scissors) => Win,
+            (Rock, Paper) | (Paper, Scissors) | (Scissors, Rock) => Lose,
+            (Paper, Rock) | (Scissors, Paper) | (Rock, Scissors) => Win,
             _ => Draw,
         }
     }
@@ -62,12 +49,9 @@ impl TryFrom<char> for Move {
     fn try_from(value: char) -> Result<Self, Self::Error> {
         use Move::*;
         match value {
-            'A' => Ok(Rock),
-            'B' => Ok(Paper),
-            'C' => Ok(Scissors),
-            'X' => Ok(Rock),
-            'Y' => Ok(Paper),
-            'Z' => Ok(Scissors),
+            'A' | 'X' => Ok(Rock),
+            'B' | 'Y' => Ok(Paper),
+            'C' | 'Z' => Ok(Scissors),
             c => Err(ParseError::Move(c)),
         }
     }
