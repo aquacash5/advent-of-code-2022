@@ -92,6 +92,26 @@ macro_rules! aoc_main {
         }
     };
 
+    ($parse1:ident, $parse2:ident, $part1:ident, $part2:ident) => {
+        fn main() -> AocResult<()> {
+            let cli = Cli::parse();
+            let input = cli.input()?;
+            if cli.should_run(SolutionPart::PartOne) {
+                let parsed = $parse1(&input);
+                let (_, parsed) = aoc_main!(@finalize, parsed);
+                let part1 = $part1(&parsed)?;
+                println!("Part 1: {:?}", part1);
+            }
+            if cli.should_run(SolutionPart::PartTwo) {
+                let parsed = $parse2(&input);
+                let (_, parsed) = aoc_main!(@finalize, parsed);
+                let part2 = $part2(&parsed)?;
+                println!("Part 2: {:?}", part2);
+            }
+            Ok(())
+        }
+    };
+
     (@finalize, $parsed:expr) => {
         nom::Finish::finish($parsed).map_err(|nom::error::Error { input, code }| {
             nom::error::Error {
