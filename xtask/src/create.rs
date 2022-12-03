@@ -42,7 +42,7 @@ fn test() {}
 const CARGO_TOML_SCAFFOLDING: &str = indoc! { r#"
 [package]
 name = "day-{DAY-NUMBER}"
-version = "0.1.0"
+version = "1.0.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
