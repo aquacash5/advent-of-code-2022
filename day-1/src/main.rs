@@ -31,7 +31,7 @@ fn part1(input: &InputData) -> AocResult<u64> {
         .map(|v| v.iter().sum())
         // Find the max value
         .max()
-        .unwrap())
+        .unwrap_or_default())
 }
 
 #[allow(clippy::unnecessary_wraps)]
@@ -61,7 +61,7 @@ fn test() {
                 vec![4000],
                 vec![5000, 6000],
                 vec![7000, 8000, 9000],
-                vec![10_000]
+                vec![10_000],
             ]
         }
     );

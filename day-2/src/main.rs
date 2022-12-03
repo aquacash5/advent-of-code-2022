@@ -21,9 +21,9 @@ enum Move {
 }
 
 impl Move {
-    fn rig(self, outcome: Outcome) -> Self {
-        use Move::*;
-        use Outcome::*;
+    const fn rig(self, outcome: Outcome) -> Self {
+        use Move::{Paper, Rock, Scissors};
+        use Outcome::{Draw, Lose, Win};
         match (outcome, self) {
             (Draw, _) => self,
             (Lose, Rock) | (Win, Paper) => Scissors,
@@ -32,9 +32,9 @@ impl Move {
         }
     }
 
-    fn outcome(self, other: Move) -> Outcome {
-        use Move::*;
-        use Outcome::*;
+    const fn outcome(self, other: Self) -> Outcome {
+        use Move::{Paper, Rock, Scissors};
+        use Outcome::{Draw, Lose, Win};
         match (self, other) {
             (Rock, Paper) | (Paper, Scissors) | (Scissors, Rock) => Lose,
             (Paper, Rock) | (Scissors, Paper) | (Rock, Scissors) => Win,
@@ -47,7 +47,7 @@ impl TryFrom<char> for Move {
     type Error = ParseError;
 
     fn try_from(value: char) -> Result<Self, Self::Error> {
-        use Move::*;
+        use Move::{Paper, Rock, Scissors};
         match value {
             'A' | 'X' => Ok(Rock),
             'B' | 'Y' => Ok(Paper),
@@ -59,7 +59,7 @@ impl TryFrom<char> for Move {
 
 impl Score for Move {
     fn score(&self) -> i32 {
-        use Move::*;
+        use Move::{Paper, Rock, Scissors};
         match self {
             Rock => 1,
             Paper => 2,
@@ -91,7 +91,7 @@ impl TryFrom<char> for Outcome {
     type Error = ParseError;
 
     fn try_from(value: char) -> Result<Self, Self::Error> {
-        use Outcome::*;
+        use Outcome::{Draw, Lose, Win};
         match value {
             'X' => Ok(Lose),
             'Y' => Ok(Draw),
@@ -103,7 +103,7 @@ impl TryFrom<char> for Outcome {
 
 impl Score for Outcome {
     fn score(&self) -> i32 {
-        use Outcome::*;
+        use Outcome::{Draw, Lose, Win};
         match self {
             Lose => 0,
             Draw => 3,
@@ -178,19 +178,19 @@ fn parse2(input: &str) -> ParseResult<InputData2> {
 
 #[allow(clippy::unnecessary_wraps)]
 fn part1(input: &InputData1) -> AocResult<i32> {
-    Ok(input.rounds.iter().map(|r| r.score_player2()).sum())
+    Ok(input.rounds.iter().map(Round::score_player2).sum())
 }
 
 #[allow(clippy::unnecessary_wraps)]
 fn part2(input: &InputData2) -> AocResult<i32> {
-    Ok(input.rounds.iter().map(|r| r.score_player2()).sum())
+    Ok(input.rounds.iter().map(StrategicRound::score_player2).sum())
 }
 
 aoc_main!(parse1, parse2, part1, part2);
 
 #[test]
 fn test_rounds() {
-    use Move::*;
+    use Move::{Paper, Rock};
     assert_eq!(
         Round {
             player1: Rock,
@@ -203,7 +203,7 @@ fn test_rounds() {
 
 #[test]
 fn test1() {
-    use Move::*;
+    use Move::{Paper, Rock, Scissors};
     let input = "A Y\nB X\nC Z";
     assert_parser!(
         parse1,
@@ -221,7 +221,7 @@ fn test1() {
                 Round {
                     player1: Scissors,
                     player2: Scissors
-                }
+                },
             ]
         }
     );
@@ -230,8 +230,8 @@ fn test1() {
 
 #[test]
 fn test2() {
-    use Move::*;
-    use Outcome::*;
+    use Move::{Paper, Rock, Scissors};
+    use Outcome::{Draw, Lose, Win};
     let input = "A Y\nB X\nC Z";
     assert_parser!(
         parse2,
