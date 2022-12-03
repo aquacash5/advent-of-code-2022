@@ -63,7 +63,7 @@ fn part2(input: &InputData) -> AocResult<u64> {
 aoc_main!(parse, part1, part2);
 
 #[test]
-fn test_char_rank() {
+fn test_rank_char() {
     assert_eq!(1, rank_char('a'));
     assert_eq!(26, rank_char('z'));
     assert_eq!(27, rank_char('A'));
