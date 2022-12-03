@@ -6,57 +6,59 @@ use utils::*;
 
 #[derive(Debug)]
 struct InputData {
-    data: Vec<String>,
+    data: Vec<Vec<i32>>,
 }
 
-fn rank_char(c: char) -> u64 {
+fn rank_alpha(c: char) -> i32 {
     match c {
-        'a'..='z' => c as u64 - 'a' as u64 + 1,
-        'A'..='Z' => c as u64 - 'A' as u64 + 27,
-        _ => 0,
+        'a'..='z' => c as i32 - 'a' as i32 + 1,
+        'A'..='Z' => c as i32 - 'A' as i32 + 27,
+        _ => unreachable!("Bad value passed in {c}"),
     }
 }
 
-fn str_intersection(s1: &str, s2: &str) -> String {
-    let h1: HashSet<char> = HashSet::from_iter(s1.chars());
-    let h2: HashSet<char> = HashSet::from_iter(s2.chars());
-    h1.intersection(&h2).join("")
+fn intersection(i1: &[i32], i2: &[i32]) -> Vec<i32> {
+    let h1: HashSet<i32> = i1.iter().copied().collect();
+    let h2: HashSet<i32> = i2.iter().copied().collect();
+    h1.intersection(&h2).copied().collect()
 }
 
 fn parse(input: &str) -> ParseResult<InputData> {
     use nom::{
-        character::complete::{alpha0, line_ending},
+        character::{
+            complete::{line_ending, satisfy},
+            is_alphabetic,
+        },
         combinator::map,
-        multi::separated_list1,
+        multi::{many1, separated_list1},
     };
-    let line = separated_list1(line_ending, alpha0);
-    let mut parse = map(line, |v| InputData {
-        data: v.iter().map(|s: &&str| s.to_string()).collect(),
-    });
+
+    let alpha = satisfy(|c| is_alphabetic(c as u8));
+    let char_to_i32 = map(alpha, rank_alpha);
+    let line = separated_list1(line_ending, many1(char_to_i32));
+    let mut parse = map(line, |data| InputData { data });
     parse(input)
 }
 
 #[allow(clippy::unnecessary_wraps)]
-fn part1(input: &InputData) -> AocResult<u64> {
+fn part1(input: &InputData) -> AocResult<i32> {
     Ok(input
         .data
         .iter()
         .map(|s| s.split_at(s.len() / 2))
-        .map(|(s1, s2)| str_intersection(s1, s2))
-        .flat_map(|s| s.chars().next())
-        .map(rank_char)
+        .map(|(i1, i2)| intersection(i1, i2))
+        .flat_map(|v| v.first().copied())
         .sum())
 }
 
 #[allow(clippy::unnecessary_wraps)]
-fn part2(input: &InputData) -> AocResult<u64> {
+fn part2(input: &InputData) -> AocResult<i32> {
     Ok(input
         .data
         .iter()
         .tuples()
-        .map(|(s1, s2, s3)| str_intersection(&str_intersection(s1, s2), s3))
-        .flat_map(|s| s.chars().next())
-        .map(rank_char)
+        .map(|(i1, i2, i3)| intersection(&intersection(i1, i2), i3))
+        .flat_map(|v| v.first().copied())
         .sum())
 }
 
@@ -64,10 +66,10 @@ aoc_main!(parse, part1, part2);
 
 #[test]
 fn test_rank_char() {
-    assert_eq!(1, rank_char('a'));
-    assert_eq!(26, rank_char('z'));
-    assert_eq!(27, rank_char('A'));
-    assert_eq!(52, rank_char('Z'));
+    assert_eq!(1, rank_alpha('a'));
+    assert_eq!(26, rank_alpha('z'));
+    assert_eq!(27, rank_alpha('A'));
+    assert_eq!(52, rank_alpha('Z'));
 }
 
 #[test]
@@ -78,19 +80,14 @@ PmmdzqPrVvPwwTWBwg
 wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn
 ttgJtRGJQctTZtZT
 CrZsJsPPZsGzwwsLwLmpwMDw";
-
     assert_parser!(
         parse,
         input,
         InputData {
-            data: vec![
-                "vJrwpWtwJgWrhcsFMMfFFhFp".to_string(),
-                "jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL".to_string(),
-                "PmmdzqPrVvPwwTWBwg".to_string(),
-                "wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn".to_string(),
-                "ttgJtRGJQctTZtZT".to_string(),
-                "CrZsJsPPZsGzwwsLwLmpwMDw".to_string(),
-            ]
+            data: input
+                .lines()
+                .map(|l| l.chars().map(rank_alpha).collect())
+                .collect()
         }
     );
     assert_part!(parse, part1, input, 157);
