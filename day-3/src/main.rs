@@ -47,7 +47,7 @@ fn part1(input: &InputData) -> AocResult<i32> {
         .iter()
         .map(|s| s.split_at(s.len() / 2))
         .map(|(i1, i2)| intersection(i1, i2))
-        .flat_map(|v| v.first().copied())
+        .filter_map(|v| v.first().copied())
         .sum())
 }
 
@@ -58,7 +58,7 @@ fn part2(input: &InputData) -> AocResult<i32> {
         .iter()
         .tuples()
         .map(|(i1, i2, i3)| intersection(&intersection(i1, i2), i3))
-        .flat_map(|v| v.first().copied())
+        .filter_map(|v| v.first().copied())
         .sum())
 }
 
