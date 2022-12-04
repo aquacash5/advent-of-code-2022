@@ -42,10 +42,7 @@ fn either_subset((r1, r2): &&(RangeInclusive<u32>, RangeInclusive<u32>)) -> bool
 }
 
 fn overlap((r1, r2): &&(RangeInclusive<u32>, RangeInclusive<u32>)) -> bool {
-    r1.contains(r2.start())
-        || r1.contains(r2.end())
-        || r2.contains(r1.start())
-        || r2.contains(r1.end())
+    !(r1.end() < r2.start() || r2.end() < r1.start())
 }
 
 #[allow(clippy::unnecessary_wraps)]
