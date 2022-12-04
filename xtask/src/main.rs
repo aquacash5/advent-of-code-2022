@@ -150,12 +150,17 @@ fn test_all(sh: &Shell) -> anyhow::Result<()> {
     // the manifest of the workspace.
     let workspace_manifest = Path::new(env!("CARGO_MANIFEST_DIR")).with_file_name("Cargo.toml");
     let system_config = Config::default()?;
-    let workspace = Workspace::new(&workspace_manifest, &system_config)?;
-    let cargo_test = sh.cmd("cargo").arg("test").arg("--workspace");
-    let cargo_test = workspace
+    Workspace::new(&workspace_manifest, &system_config)?
         .members()
-        .filter(|p| !p.name().starts_with("day"))
-        .fold(cargo_test, |c, p| c.arg("--exclude").arg(p.name()));
-    cargo_test.run()?;
+        .filter(|p| p.name().starts_with("day"))
+        .for_each(|p| {
+            sh.cmd("cargo")
+                .arg("test")
+                .arg("-q")
+                .arg("-p")
+                .arg(p.name())
+                .run()
+                .unwrap()
+        });
     Ok(())
 }
