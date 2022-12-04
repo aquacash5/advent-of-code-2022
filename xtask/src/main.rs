@@ -105,7 +105,7 @@ fn main() -> anyhow::Result<()> {
         Cli::Clippy => {
             cmd!(
                 sh,
-                "cargo clippy -- -W clippy::all -W clippy::pedantic -W clippy::nursery"
+                "cargo clippy -q -- -W clippy::all -W clippy::pedantic -W clippy::nursery"
             )
             .run()?;
         }
@@ -120,16 +120,16 @@ fn main() -> anyhow::Result<()> {
             let part = format!("{part}");
             cmd!(
                 sh,
-                "cargo run --release --package {package} -- {path} -p {part}"
+                "cargo run -q --release --package {package} -- {path} -p {part}"
             )
             .run()?;
         }
         Cli::Tree => {
-            cmd!(sh, "cargo run --release --package tree").run()?;
+            cmd!(sh, "cargo run -q --release --package tree").run()?;
         }
         Cli::Test { day } => {
             let day = format!("day-{day}");
-            cmd!(sh, "cargo test --package {day}").run()?;
+            cmd!(sh, "cargo test -q --package {day}").run()?;
         }
         Cli::TestAll => {
             test_all(&sh)?;
