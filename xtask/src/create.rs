@@ -92,25 +92,30 @@ pub fn generate_day(day: u64) -> anyhow::Result<()> {
     if location.join("input.txt").exists() {
         println!("input.txt exists");
     } else {
-        println!("Creating input.txt");
-        let aoc_session = read_to_string(
-            dirs::home_dir()
-                .context("No home directory")?
-                .join(".adventofcode"),
-        )?
-        .trim()
-        .to_string();
-        let client = req::Client::new();
-        let input_data = client
-            .request(
-                reqwest::Method::GET,
-                format!("https://adventofcode.com/{AOC_YEAR}/day/{day}/input"),
-            )
-            .header(reqwest::header::COOKIE, format!("session={aoc_session}"))
-            .send()?
-            .error_for_status()?
-            .text()?;
-        fs::write(location.join("input.txt"), input_data)?;
+        generate_input(day, &location.join("input.txt"))?
     }
+    Ok(())
+}
+
+pub fn generate_input(day: u64, location: &Path) -> anyhow::Result<()> {
+    println!("Retrieving input.txt");
+    let aoc_session = read_to_string(
+        dirs::home_dir()
+            .context("No home directory")?
+            .join(".adventofcode"),
+    )?
+    .trim()
+    .to_string();
+    let client = req::Client::new();
+    let input_data = client
+        .request(
+            reqwest::Method::GET,
+            format!("https://adventofcode.com/{AOC_YEAR}/day/{day}/input"),
+        )
+        .header(reqwest::header::COOKIE, format!("session={aoc_session}"))
+        .send()?
+        .error_for_status()?
+        .text()?;
+    fs::write(location, input_data)?;
     Ok(())
 }

@@ -6,7 +6,7 @@ use log::trace;
 use std::{fmt::Display, path::Path};
 use xshell::{cmd, Shell};
 
-use crate::create::generate_day;
+use crate::create::{generate_day, generate_input};
 
 /// Tasks to use and maintain this project
 #[derive(Parser, Debug)]
@@ -117,6 +117,9 @@ fn main() -> anyhow::Result<()> {
             let path = Path::new(env!("CARGO_MANIFEST_DIR"))
                 .with_file_name(&package)
                 .join("input.txt");
+            if !path.exists() {
+                generate_input(day, dbg!(&path))?;
+            }
             let part = format!("{part}");
             cmd!(
                 sh,
