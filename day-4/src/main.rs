@@ -33,15 +33,15 @@ fn parse(input: &str) -> ParseResult<InputData> {
     parser(input)
 }
 
-fn contains_range(r1: &RangeInclusive<u32>, r2: &RangeInclusive<u32>) -> bool {
+fn is_range_subset(r1: &RangeInclusive<u32>, r2: &RangeInclusive<u32>) -> bool {
     r1.contains(r2.start()) && r1.contains(r2.end())
 }
 
-fn either_contains(r1: &RangeInclusive<u32>, r2: &RangeInclusive<u32>) -> bool {
-    contains_range(r1, r2) || contains_range(r2, r1)
+fn either_subset((r1, r2): &&(RangeInclusive<u32>, RangeInclusive<u32>)) -> bool {
+    is_range_subset(r1, r2) || is_range_subset(r2, r1)
 }
 
-fn overlap(r1: &RangeInclusive<u32>, r2: &RangeInclusive<u32>) -> bool {
+fn overlap((r1, r2): &&(RangeInclusive<u32>, RangeInclusive<u32>)) -> bool {
     r1.contains(r2.start())
         || r1.contains(r2.end())
         || r2.contains(r1.start())
@@ -50,20 +50,12 @@ fn overlap(r1: &RangeInclusive<u32>, r2: &RangeInclusive<u32>) -> bool {
 
 #[allow(clippy::unnecessary_wraps)]
 fn part1(input: &InputData) -> AocResult<usize> {
-    Ok(input
-        .assignments
-        .iter()
-        .filter(|(r, l)| either_contains(r, l))
-        .count())
+    Ok(input.assignments.iter().filter(either_subset).count())
 }
 
 #[allow(clippy::unnecessary_wraps)]
 fn part2(input: &InputData) -> AocResult<usize> {
-    Ok(input
-        .assignments
-        .iter()
-        .filter(|(r, l)| overlap(r, l))
-        .count())
+    Ok(input.assignments.iter().filter(overlap).count())
 }
 
 aoc_main!(parse, part1, part2);
