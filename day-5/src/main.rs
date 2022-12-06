@@ -35,24 +35,25 @@ fn transpose<T>(v: Vec<Vec<T>>) -> Vec<Vec<T>> {
 
 fn parse(input: &str) -> ParseResult<InputData> {
     use nom::{
+        branch::alt,
         bytes::complete::tag,
         character::complete::{char, line_ending, one_of, u32},
         combinator::map,
         multi::{many1, separated_list1},
         sequence::{delimited, preceded, separated_pair, terminated, tuple},
     };
-    let alpha = delimited(
-        one_of(" ["),
-        one_of("ABCDEFGHIJKLMNOPQRSTUVWXYZ "),
-        one_of("] "),
-    );
-    let line = separated_list1(char(' '), alpha);
+
+    let alphas = ('A'..='Z').collect::<String>();
+    let digits = ('0'..='9').collect::<String>();
+    let alpha = delimited(char('['), one_of(alphas.as_str()), char(']'));
+    let space = delimited(char(' '), char(' '), char(' '));
+    let line = separated_list1(char(' '), alt((alpha, space)));
     let crates = separated_list1(line_ending, line);
-    let line = tuple((line_ending, many1(one_of("1234567890 ")), line_ending));
+    let line = tuple((line_ending, many1(one_of(digits.as_str())), line_ending));
     let crates = terminated(crates, line);
-    let move_ = delimited(tag("move "), u32, char(' '));
-    let from = delimited(tag("from "), u32, char(' '));
-    let to = preceded(tag("to "), u32);
+    let move_ = preceded(tag("move "), u32);
+    let from = preceded(tag(" from "), u32);
+    let to = preceded(tag(" to "), u32);
     let instruction = map(tuple((move_, from, to)), |(a, f, t)| Instruction {
         amount: a as usize,
         source: f as usize,

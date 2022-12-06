@@ -139,12 +139,12 @@ fn parse1(input: &str) -> ParseResult<InputData1> {
         character::complete::{char, line_ending, one_of},
         combinator::{map, map_res},
         multi::separated_list1,
-        sequence::tuple,
+        sequence::separated_pair,
     };
     let player1 = one_of("ABC");
     let player2 = one_of("XYZ");
-    let round = tuple((player1, char(' '), player2));
-    let round = map_res(round, |(p1, _, p2)| {
+    let round = separated_pair(player1, char(' '), player2);
+    let round = map_res(round, |(p1, p2)| {
         Ok::<Round, ParseError>(Round {
             player1: p1.try_into()?,
             player2: p2.try_into()?,

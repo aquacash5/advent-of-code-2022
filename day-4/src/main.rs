@@ -15,6 +15,7 @@ fn assignment(input: &str) -> IResult<&str, RangeInclusive<u32>> {
         combinator::map,
         sequence::separated_pair,
     };
+
     map(separated_pair(u32, char('-'), u32), |(s, e)| s..=e)(input)
 }
 
