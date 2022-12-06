@@ -5,6 +5,7 @@ use utils::*;
 #[derive(Debug)]
 struct InputData(Vec<char>);
 
+#[allow(clippy::unnecessary_wraps)]
 fn parse(input: &str) -> ParseResult<InputData> {
     Ok(("", InputData(input.chars().collect())))
 }
@@ -15,8 +16,7 @@ fn part1(input: &InputData) -> AocResult<usize> {
         .0
         .windows(4)
         .find_position(|a| a.iter().combinations(2).all(|v| v[0] != v[1]))
-        .map(|(i, _)| i)
-        .unwrap_or(0)
+        .map_or(0, |(i, _)| i)
         + 4)
 }
 
@@ -26,8 +26,7 @@ fn part2(input: &InputData) -> AocResult<usize> {
         .0
         .windows(14)
         .find_position(|a| a.iter().combinations(2).all(|v| v[0] != v[1]))
-        .map(|(i, _)| i)
-        .unwrap_or(0)
+        .map_or(0, |(i, _)| i)
         + 14)
 }
 

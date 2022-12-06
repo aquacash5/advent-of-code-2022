@@ -42,33 +42,46 @@ fn parse(input: &str) -> ParseResult<InputData> {
         multi::{many1, separated_list1},
         sequence::{delimited, preceded, separated_pair, terminated, tuple},
     };
+    // Character set
+    let alphas: String = ('A'..='Z').collect();
 
-    let alphas = ('A'..='Z').collect::<String>();
-    let digits = ('0'..='9').collect::<String>();
+    // Crates
     let alpha = delimited(char('['), one_of(alphas.as_str()), char(']'));
     let space = delimited(char(' '), char(' '), char(' '));
     let line = separated_list1(char(' '), alt((alpha, space)));
     let crates = separated_list1(line_ending, line);
-    let line = tuple((line_ending, many1(one_of(digits.as_str())), line_ending));
+
+    // Ignore Stack labels
+    let line = tuple((line_ending, many1(one_of("0123456789 ")), line_ending));
     let crates = terminated(crates, line);
+
+    // Instructions
     let move_ = preceded(tag("move "), u32);
     let from = preceded(tag(" from "), u32);
     let to = preceded(tag(" to "), u32);
     let instruction = map(tuple((move_, from, to)), |(a, f, t)| Instruction {
         amount: a as usize,
-        source: f as usize,
-        destination: t as usize,
+        // Change for 0 based indexing
+        source: f as usize - 1,
+        destination: t as usize - 1,
     });
     let instructions = separated_list1(line_ending, instruction);
+
+    // Parse everything
     let body_split = separated_pair(crates, line_ending, instructions);
     let mut parse = map(body_split, |(crates, instructions)| {
+        // Rotate crates
         let mut crates = transpose(crates);
+
+        // Reverse and truncate crate stacks
         for stack in &mut crates {
             stack.reverse();
+            // Remove space characters
             if let Some((space, _)) = stack.iter().find_position(|c| c == &&' ') {
                 stack.truncate(space);
             }
         }
+
         InputData {
             crates,
             instructions,
@@ -82,8 +95,8 @@ fn part1(input: &InputData) -> AocResult<String> {
     let mut crates = input.crates.clone();
     for i in &input.instructions {
         for _ in 0..i.amount {
-            let temp = crates[i.source - 1].pop().unwrap();
-            crates[i.destination - 1].push(temp);
+            let temp = crates[i.source].pop().unwrap();
+            crates[i.destination].push(temp);
         }
     }
     Ok(crates.iter().map(|cs| cs.last().unwrap()).collect())
@@ -93,9 +106,9 @@ fn part1(input: &InputData) -> AocResult<String> {
 fn part2(input: &InputData) -> AocResult<String> {
     let mut crates = input.crates.clone();
     for i in &input.instructions {
-        let temp = crates[i.source - 1].len() - i.amount;
-        let mut temp = crates[i.source - 1].split_off(temp);
-        crates[i.destination - 1].append(&mut temp);
+        let temp = crates[i.source].len() - i.amount;
+        let mut temp = crates[i.source].split_off(temp);
+        crates[i.destination].append(&mut temp);
     }
     Ok(crates.iter().map(|cs| cs.last().unwrap()).collect())
 }
@@ -121,23 +134,23 @@ move 1 from 1 to 2";
             instructions: vec![
                 Instruction {
                     amount: 1,
-                    source: 2,
-                    destination: 1
+                    source: 1,
+                    destination: 0
                 },
                 Instruction {
                     amount: 3,
-                    source: 1,
-                    destination: 3
+                    source: 0,
+                    destination: 2
                 },
                 Instruction {
                     amount: 2,
-                    source: 2,
-                    destination: 1
+                    source: 1,
+                    destination: 0
                 },
                 Instruction {
                     amount: 1,
-                    source: 1,
-                    destination: 2
+                    source: 0,
+                    destination: 1
                 },
             ]
         }

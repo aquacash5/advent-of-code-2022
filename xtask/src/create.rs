@@ -92,7 +92,7 @@ pub fn generate_day(day: u64) -> anyhow::Result<()> {
     if location.join("input.txt").exists() {
         println!("input.txt exists");
     } else {
-        generate_input(day, &location.join("input.txt"))?
+        generate_input(day, &location.join("input.txt"))?;
     }
     Ok(())
 }

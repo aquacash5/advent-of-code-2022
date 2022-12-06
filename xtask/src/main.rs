@@ -160,7 +160,7 @@ fn test_all(sh: &Shell) -> anyhow::Result<()> {
                 .arg("-p")
                 .arg(p.name())
                 .run()
-                .unwrap()
+                .unwrap();
         });
     Ok(())
 }
