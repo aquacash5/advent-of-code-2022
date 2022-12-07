@@ -4,7 +4,7 @@ use itertools::Itertools;
 #[allow(clippy::wildcard_imports)]
 use utils::*;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 struct InputData {
     data: Vec<Vec<i32>>,
 }

@@ -135,6 +135,6 @@ macro_rules! assert_part {
 macro_rules! assert_parser {
     ($parse:ident, $input:expr, $equals:expr) => {{
         let input = $parse($input).unwrap().1;
-        assert_eq!(format!("{:?}", input), format!("{:?}", $equals))
+        assert_eq!(input, $equals)
     }};
 }

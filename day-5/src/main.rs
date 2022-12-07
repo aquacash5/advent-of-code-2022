@@ -2,14 +2,14 @@ use itertools::Itertools;
 #[allow(clippy::wildcard_imports)]
 use utils::*;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 struct Instruction {
     amount: usize,
     source: usize,
     destination: usize,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, PartialEq, Eq)]
 struct InputData {
     crates: Vec<Vec<char>>,
     instructions: Vec<Instruction>,

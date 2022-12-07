@@ -68,7 +68,7 @@ impl Score for Move {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 struct Round {
     player1: Move,
     player2: Move,
@@ -112,7 +112,7 @@ impl Score for Outcome {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 struct StrategicRound {
     player1: Move,
     outcome: Outcome,
@@ -124,12 +124,11 @@ impl StrategicRound {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 struct InputData1 {
     rounds: Vec<Round>,
 }
-
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 struct InputData2 {
     rounds: Vec<StrategicRound>,
 }

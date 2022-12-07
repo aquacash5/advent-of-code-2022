@@ -4,7 +4,7 @@ use nom::IResult;
 #[allow(clippy::wildcard_imports)]
 use utils::*;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 struct InputData {
     assignments: Vec<(RangeInclusive<u32>, RangeInclusive<u32>)>,
 }

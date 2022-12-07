@@ -12,22 +12,26 @@ fn parse(input: &str) -> ParseResult<InputData> {
 
 #[allow(clippy::unnecessary_wraps)]
 fn part1(input: &InputData) -> AocResult<usize> {
+    const WINDOW_SIZE: usize = 4;
+
     Ok(input
         .0
-        .windows(4)
+        .windows(WINDOW_SIZE)
         .find_position(|a| a.iter().combinations(2).all(|v| v[0] != v[1]))
         .map_or(0, |(i, _)| i)
-        + 4)
+        + WINDOW_SIZE)
 }
 
 #[allow(clippy::unnecessary_wraps)]
 fn part2(input: &InputData) -> AocResult<usize> {
+    const WINDOW_SIZE: usize = 14;
+
     Ok(input
         .0
-        .windows(14)
+        .windows(WINDOW_SIZE)
         .find_position(|a| a.iter().combinations(2).all(|v| v[0] != v[1]))
         .map_or(0, |(i, _)| i)
-        + 14)
+        + WINDOW_SIZE)
 }
 
 aoc_main!(parse, part1, part2);
