@@ -15,7 +15,7 @@ use itertools::Itertools;
 #[allow(clippy::wildcard_imports)]
 use utils::*;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 struct InputData {}
 
 fn parse(input: &str) -> ParseResult<InputData> {
