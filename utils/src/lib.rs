@@ -82,11 +82,11 @@ macro_rules! aoc_main {
             let (_, parsed) = aoc_main!(@finalize, parsed);
             if cli.should_run(SolutionPart::PartOne) {
                 let part1 = $part1(&parsed)?;
-                println!("Part 1: {:?}", part1);
+                println!("Part 1: {:#?}", part1);
             }
             if cli.should_run(SolutionPart::PartTwo) {
                 let part2 = $part2(&parsed)?;
-                println!("Part 2: {:?}", part2);
+                println!("Part 2: {:#?}", part2);
             }
             Ok(())
         }
@@ -100,13 +100,13 @@ macro_rules! aoc_main {
                 let parsed = $parse1(&input);
                 let (_, parsed) = aoc_main!(@finalize, parsed);
                 let part1 = $part1(&parsed)?;
-                println!("Part 1: {:?}", part1);
+                println!("Part 1: {:#?}", part1);
             }
             if cli.should_run(SolutionPart::PartTwo) {
                 let parsed = $parse2(&input);
                 let (_, parsed) = aoc_main!(@finalize, parsed);
                 let part2 = $part2(&parsed)?;
-                println!("Part 2: {:?}", part2);
+                println!("Part 2: {:#?}", part2);
             }
             Ok(())
         }
