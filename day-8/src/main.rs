@@ -163,7 +163,7 @@ fn score_tree(input: &InputData, row: usize, col: usize) -> u64 {
         })
         .into_inner();
     let score = up * down * right * left;
-    score as u64
+    u64::from(score)
 }
 
 #[allow(clippy::unnecessary_wraps)]

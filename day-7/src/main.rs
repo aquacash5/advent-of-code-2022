@@ -16,7 +16,7 @@ struct SudoPath {
 
 impl SudoPath {
     fn new() -> Self {
-        SudoPath {
+        Self {
             path: vec!["/".to_string()],
         }
     }
@@ -42,7 +42,7 @@ impl SudoPath {
     }
 
     fn make_path(&self, file: &str) -> String {
-        let mut output = format!("{}/{}", self.path.join("/"), file);
+        let mut output = format!("{}/{file}", self.path.join("/"),);
         while output.contains("//") {
             output = output.replace("//", "/");
         }
@@ -58,8 +58,6 @@ fn parse(input: &str) -> ParseResult<InputData> {
         let cmd: Vec<&str> = line.split(' ').collect();
         match &*cmd {
             ["$", "cd", d] => dir.cd(d),
-            ["$", "ls"] => (),
-            ["dir", _] => (),
             [size, file] => {
                 fs.entry(dir.make_path(file))
                     .or_insert_with(|| size.parse().unwrap());

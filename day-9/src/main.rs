@@ -21,7 +21,7 @@ struct Rope1 {
 
 impl Rope1 {
     fn step(&mut self, head_move: Movement) -> (i32, i32) {
-        use Movement::*;
+        use Movement::{Down, Left, Right, Up};
 
         let prev = self.head;
         match head_move {
@@ -37,7 +37,7 @@ impl Rope1 {
     }
 }
 
-fn unit(i: i32) -> i32 {
+const fn unit(i: i32) -> i32 {
     if i.is_positive() {
         1
     } else {
@@ -58,7 +58,7 @@ struct Rope2 {
 
 impl Rope2 {
     fn step(&mut self, head_move: Movement) -> (i32, i32) {
-        use Movement::*;
+        use Movement::{Down, Left, Right, Up};
 
         match head_move {
             Up => self.body[0].1 += 1,
@@ -127,7 +127,7 @@ fn parse(input: &str) -> ParseResult<InputData> {
         multi::separated_list1,
         sequence::separated_pair,
     };
-    use Movement::*;
+    use Movement::{Down, Left, Right, Up};
     let movement = map(one_of("UDLR"), |c| match c {
         'R' => Right,
         'L' => Left,
