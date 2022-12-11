@@ -35,8 +35,8 @@ impl Operator {
     fn parse(input: &str) -> ParseResult<Operator> {
         use nom::{branch::alt, bytes::complete::tag, combinator::map};
         let add = map(tag(" + "), |_| Operator::Add);
-        let mult = map(tag(" * "), |_| Operator::Multiply);
-        alt((add, mult))(input)
+        let mul = map(tag(" * "), |_| Operator::Multiply);
+        alt((add, mul))(input)
     }
 
     fn operate(&self, i: u64, j: u64) -> u64 {
@@ -44,6 +44,16 @@ impl Operator {
             Operator::Add => i + j,
             Operator::Multiply => i * j,
         }
+    }
+}
+
+#[derive(Debug, PartialEq, Clone, Copy)]
+struct Relief(u64);
+
+impl Relief {
+    #[inline]
+    fn value(&self) -> u64 {
+        self.0
     }
 }
 
@@ -121,7 +131,7 @@ impl Monkey {
         self.items.push_back(n);
     }
 
-    fn throw_to(&self, n: u64) -> usize {
+    fn throw(&self, n: u64) -> usize {
         if n % self.test == 0 {
             self.true_test
         } else {
@@ -129,10 +139,11 @@ impl Monkey {
         }
     }
 
-    fn inspect(&self, n: u64, relief: u64) -> (usize, u64) {
-        let worry = self.operation.operate(n);
-        let relief = worry / relief;
-        (self.throw_to(relief), relief)
+    fn inspect(&mut self, relief: Relief) -> Option<u64> {
+        let item = self.items.pop_front()?;
+        let worry = self.operation.operate(item);
+        let new_item = worry / relief.value();
+        Some(new_item)
     }
 }
 
@@ -152,18 +163,16 @@ fn parse(input: &str) -> ParseResult<InputData> {
 fn part1(input: &InputData) -> AocResult<usize> {
     const ROUNDS: usize = 20;
     let mut monkeys: Vec<Monkey> = input.monkeys.to_vec();
+    let mut inspected: Vec<usize> = vec![0; monkeys.len()];
     let test_lcm: u64 = input.monkeys.iter().fold(1, |acc, m| acc.lcm(&m.test));
 
-    let mut inspected: Vec<usize> = vec![0; monkeys.len()];
-    for _ in 0..ROUNDS {
-        for current_monkey in 0..monkeys.len() {
-            let mut monkey = (*monkeys.get(current_monkey).unwrap()).clone();
-            inspected[current_monkey] += monkey.items.len();
-            while let Some(item) = monkey.items.pop_front() {
-                let (recipient, item) = monkey.inspect(item, 3);
+    for _round in 0..ROUNDS {
+        for turn in 0..monkeys.len() {
+            while let Some(item) = monkeys[turn].inspect(Relief(3)) {
+                let recipient = monkeys[turn].throw(item);
                 monkeys[recipient].catch(item % test_lcm);
+                inspected[turn] += 1;
             }
-            monkeys[current_monkey].items.clear();
         }
     }
     inspected.sort_by_key(|i| std::cmp::Reverse(*i));
@@ -174,18 +183,16 @@ fn part1(input: &InputData) -> AocResult<usize> {
 fn part2(input: &InputData) -> AocResult<usize> {
     const ROUNDS: usize = 10_000;
     let mut monkeys: Vec<Monkey> = input.monkeys.to_vec();
+    let mut inspected: Vec<usize> = vec![0; monkeys.len()];
     let test_lcm: u64 = input.monkeys.iter().fold(1, |acc, m| acc.lcm(&m.test));
 
-    let mut inspected: Vec<usize> = vec![0; monkeys.len()];
-    for _ in 0..ROUNDS {
-        for current_monkey in 0..monkeys.len() {
-            let mut monkey = (*monkeys.get(current_monkey).unwrap()).clone();
-            inspected[current_monkey] += monkey.items.len();
-            while let Some(item) = monkey.items.pop_front() {
-                let (recipient, item) = monkey.inspect(item, 1);
+    for _round in 0..ROUNDS {
+        for turn in 0..monkeys.len() {
+            while let Some(item) = monkeys[turn].inspect(Relief(1)) {
+                let recipient = monkeys[turn].throw(item);
                 monkeys[recipient].catch(item % test_lcm);
+                inspected[turn] += 1;
             }
-            monkeys[current_monkey].items.clear();
         }
     }
     inspected.sort_by_key(|i| std::cmp::Reverse(*i));
