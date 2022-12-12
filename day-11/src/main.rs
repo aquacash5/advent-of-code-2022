@@ -51,9 +51,8 @@ impl Operator {
 struct Relief(u64);
 
 impl Relief {
-    #[inline]
-    fn value(&self) -> u64 {
-        self.0
+    fn relieve(&self, item: &Item) -> Item {
+        Item(item.0 / self.0)
     }
 }
 
@@ -83,9 +82,28 @@ impl Operation {
     }
 }
 
+#[derive(Debug, PartialEq, Clone, Copy)]
+struct Item(u64);
+
+impl Item {
+    fn parse(input: &str) -> ParseResult<Item> {
+        use nom::{character::complete::u64, combinator::map};
+
+        map(u64, Item)(input)
+    }
+
+    fn inspect(&self, op: &Operation) -> Item {
+        Item(op.operate(self.0))
+    }
+
+    fn reduce(&self, lcm: u64) -> Item {
+        Item(self.0 % lcm)
+    }
+}
+
 #[derive(Debug, PartialEq, Clone)]
 struct Monkey {
-    items: VecDeque<u64>,
+    items: VecDeque<Item>,
     operation: Operation,
     test: u64,
     true_test: usize,
@@ -106,7 +124,7 @@ impl Monkey {
         let items = map(
             delimited(
                 tag("  Starting items: "),
-                separated_list1(tag(", "), u64),
+                separated_list1(tag(", "), Item::parse),
                 line_ending,
             ),
             VecDeque::from,
@@ -127,23 +145,22 @@ impl Monkey {
         )(input)
     }
 
-    fn catch(&mut self, n: u64) {
+    fn catch(&mut self, n: Item) {
         self.items.push_back(n);
     }
 
-    fn throw(&self, n: u64) -> usize {
-        if n % self.test == 0 {
+    fn throw(&self, item: Item) -> usize {
+        if item.0 % self.test == 0 {
             self.true_test
         } else {
             self.false_test
         }
     }
 
-    fn inspect(&mut self, relief: Relief) -> Option<u64> {
+    fn inspect(&mut self, relief: Relief) -> Option<Item> {
         let item = self.items.pop_front()?;
-        let worry = self.operation.operate(item);
-        let new_item = worry / relief.value();
-        Some(new_item)
+        let item = item.inspect(&self.operation);
+        Some(relief.relieve(&item))
     }
 }
 
@@ -170,7 +187,7 @@ fn part1(input: &InputData) -> AocResult<usize> {
         for turn in 0..monkeys.len() {
             while let Some(item) = monkeys[turn].inspect(Relief(3)) {
                 let recipient = monkeys[turn].throw(item);
-                monkeys[recipient].catch(item % test_lcm);
+                monkeys[recipient].catch(item.reduce(test_lcm));
                 inspected[turn] += 1;
             }
         }
@@ -190,7 +207,7 @@ fn part2(input: &InputData) -> AocResult<usize> {
         for turn in 0..monkeys.len() {
             while let Some(item) = monkeys[turn].inspect(Relief(1)) {
                 let recipient = monkeys[turn].throw(item);
-                monkeys[recipient].catch(item % test_lcm);
+                monkeys[recipient].catch(item.reduce(test_lcm));
                 inspected[turn] += 1;
             }
         }
@@ -237,7 +254,7 @@ Monkey 3:
         InputData {
             monkeys: vec![
                 Monkey {
-                    items: vec![79, 98].into(),
+                    items: vec![Item(79), Item(98)].into(),
                     operation: Operation {
                         operator: Operator::Multiply,
                         operand1: Operand::Old,
@@ -248,7 +265,7 @@ Monkey 3:
                     false_test: 3,
                 },
                 Monkey {
-                    items: vec![54, 65, 75, 74].into(),
+                    items: vec![Item(54), Item(65), Item(75), Item(74)].into(),
                     operation: Operation {
                         operator: Operator::Add,
                         operand1: Operand::Old,
@@ -259,7 +276,7 @@ Monkey 3:
                     false_test: 0,
                 },
                 Monkey {
-                    items: vec![79, 60, 97].into(),
+                    items: vec![Item(79), Item(60), Item(97)].into(),
                     operation: Operation {
                         operator: Operator::Multiply,
                         operand1: Operand::Old,
@@ -270,7 +287,7 @@ Monkey 3:
                     false_test: 3,
                 },
                 Monkey {
-                    items: vec![74].into(),
+                    items: vec![Item(74)].into(),
                     operation: Operation {
                         operator: Operator::Add,
                         operand1: Operand::Old,
