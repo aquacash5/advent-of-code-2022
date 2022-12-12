@@ -16,11 +16,11 @@ struct InputData {
 struct Pos(usize, usize);
 
 impl Pos {
-    fn above(&self) -> Option<Self> {
+    fn up(&self) -> Option<Self> {
         Some(Self(self.0.checked_add(1)?, self.1))
     }
 
-    fn below(&self) -> Option<Self> {
+    fn down(&self) -> Option<Self> {
         Some(Self(self.0.checked_sub(1)?, self.1))
     }
 
@@ -32,10 +32,10 @@ impl Pos {
         Some(Self(self.0, self.1.checked_add(1)?))
     }
 
-    fn up(&self, map: &Array2<u8>) -> Vec<Self> {
+    fn walk_up(&self, map: &Array2<u8>) -> Vec<Self> {
         let &Self(x, y) = self;
         let &altitude = map.get((x, y)).unwrap();
-        [self.above(), self.below(), self.left(), self.right()]
+        [self.up(), self.down(), self.left(), self.right()]
             .into_iter()
             .flatten()
             .filter(|Self(x, y)| {
@@ -48,10 +48,10 @@ impl Pos {
             .collect()
     }
 
-    fn down(&self, map: &Array2<u8>) -> Vec<Self> {
+    fn walk_down(&self, map: &Array2<u8>) -> Vec<Self> {
         let &Self(x, y) = self;
         let &altitude = map.get((x, y)).unwrap();
-        [self.above(), self.below(), self.left(), self.right()]
+        [self.up(), self.down(), self.left(), self.right()]
             .into_iter()
             .flatten()
             .filter(|Self(x, y)| {
@@ -93,7 +93,7 @@ fn parse(input: &str) -> ParseResult<InputData> {
 
 #[allow(clippy::unnecessary_wraps)]
 fn part1(input: &InputData) -> AocResult<usize> {
-    let result = bfs(&input.start, |p| p.up(&input.arr), |p| p == &input.end);
+    let result = bfs(&input.start, |p| p.walk_up(&input.arr), |p| p == &input.end);
     Ok(result.expect("no path found").len() - 1)
 }
 
@@ -101,7 +101,7 @@ fn part1(input: &InputData) -> AocResult<usize> {
 fn part2(input: &InputData) -> AocResult<usize> {
     let result = bfs(
         &input.end,
-        |p| p.down(&input.arr),
+        |p| p.walk_down(&input.arr),
         |Pos(x, y)| *input.arr.get((*x, *y)).unwrap() == 0,
     );
     Ok(result.expect("no path found").len() - 1)
