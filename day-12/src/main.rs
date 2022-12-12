@@ -1,6 +1,6 @@
 use itertools::izip;
 use itertools::Itertools;
-use ndarray::{array, Array2, Axis};
+use ndarray::{Array2, Axis};
 use pathfinding::prelude::bfs;
 #[allow(clippy::wildcard_imports)]
 use utils::*;
@@ -16,49 +16,56 @@ struct InputData {
 struct Pos(usize, usize);
 
 impl Pos {
-    fn up(&self, map: &Array2<u8>) -> Vec<Pos> {
-        let &Pos(x, y) = self;
-        let &altitude = map.get((x, y)).unwrap();
-        vec![
-            Pos(x.saturating_add(1), y),
-            Pos(x.saturating_sub(1), y),
-            Pos(x, y.saturating_add(1)),
-            Pos(x, y.saturating_sub(1)),
-        ]
-        .into_iter()
-        .unique()
-        .filter(|Pos(x, y)| {
-            if let Some(&i) = map.get((*x, *y)) {
-                i <= altitude || altitude + 1 == i
-            } else {
-                false
-            }
-        })
-        .collect()
+    fn above(&self) -> Option<Self> {
+        Some(Self(self.0.checked_add(1)?, self.1))
     }
 
-    fn down(&self, map: &Array2<u8>) -> Vec<Pos> {
-        let &Pos(x, y) = self;
+    fn below(&self) -> Option<Self> {
+        Some(Self(self.0.checked_sub(1)?, self.1))
+    }
+
+    fn left(&self) -> Option<Self> {
+        Some(Self(self.0, self.1.checked_sub(1)?))
+    }
+
+    fn right(&self) -> Option<Self> {
+        Some(Self(self.0, self.1.checked_add(1)?))
+    }
+
+    fn up(&self, map: &Array2<u8>) -> Vec<Self> {
+        let &Self(x, y) = self;
         let &altitude = map.get((x, y)).unwrap();
-        vec![
-            Pos(x.saturating_add(1), y),
-            Pos(x.saturating_sub(1), y),
-            Pos(x, y.saturating_add(1)),
-            Pos(x, y.saturating_sub(1)),
-        ]
-        .into_iter()
-        .unique()
-        .filter(|Pos(x, y)| {
-            if let Some(&i) = map.get((*x, *y)) {
-                altitude <= i || altitude == i + 1
-            } else {
-                false
-            }
-        })
-        .collect()
+        [self.above(), self.below(), self.left(), self.right()]
+            .into_iter()
+            .flatten()
+            .filter(|Self(x, y)| {
+                if let Some(&i) = map.get((*x, *y)) {
+                    i <= altitude || altitude + 1 == i
+                } else {
+                    false
+                }
+            })
+            .collect()
+    }
+
+    fn down(&self, map: &Array2<u8>) -> Vec<Self> {
+        let &Self(x, y) = self;
+        let &altitude = map.get((x, y)).unwrap();
+        [self.above(), self.below(), self.left(), self.right()]
+            .into_iter()
+            .flatten()
+            .filter(|Self(x, y)| {
+                if let Some(&i) = map.get((*x, *y)) {
+                    altitude <= i || altitude == i + 1
+                } else {
+                    false
+                }
+            })
+            .collect()
     }
 }
 
+#[allow(clippy::unnecessary_wraps)]
 fn parse(input: &str) -> ParseResult<InputData> {
     let lines = input.lines().collect_vec();
     let mut data: InputData = InputData {
@@ -105,6 +112,8 @@ aoc_main!(parse, part1, part2);
 #[test]
 #[allow(clippy::zero_prefixed_literal)]
 fn test() {
+    use ndarray::array;
+
     let input = "Sabqponm\nabcryxxl\naccszExk\nacctuvwj\nabdefghi";
     assert_parser!(
         parse,
