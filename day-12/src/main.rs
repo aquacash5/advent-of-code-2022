@@ -75,7 +75,7 @@ fn parse(input: &str) -> ParseResult<InputData> {
     };
     for (x, mut row, line) in izip!(0.., data.arr.axis_iter_mut(Axis(0)), lines) {
         for (y, col, byte) in izip!(0.., row.iter_mut(), line.as_bytes()) {
-            match *byte {
+            match byte {
                 b'S' => {
                     *col = 0;
                     data.start = Pos(x, y);
