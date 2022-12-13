@@ -82,8 +82,7 @@ fn part1(input: &InputData) -> AocResult<usize> {
         .packet_pairs
         .iter()
         .enumerate()
-        .filter(|(_, (l, r))| l < r)
-        .map(|(i, _)| i + 1)
+        .filter_map(|(i, (l, r))| if l < r { Some(i + 1) } else { None })
         .sum())
 }
 
@@ -100,8 +99,13 @@ fn part2(input: &InputData) -> AocResult<usize> {
         .chain(divider_packets.iter())
         .sorted()
         .enumerate()
-        .filter(|(_, p)| divider_packets.contains(p))
-        .map(|(i, _)| i + 1)
+        .filter_map(|(i, p)| {
+            if divider_packets.contains(p) {
+                Some(i + 1)
+            } else {
+                None
+            }
+        })
         .product())
 }
 
