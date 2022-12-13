@@ -58,6 +58,7 @@ fn parse(input: &str) -> ParseResult<InputData> {
         let cmd: Vec<&str> = line.split(' ').collect();
         match &*cmd {
             ["$", "cd", d] => dir.cd(d),
+            ["$", "ls"] | ["dir", _] => (),
             [size, file] => {
                 fs.entry(dir.make_path(file))
                     .or_insert_with(|| size.parse().unwrap());
