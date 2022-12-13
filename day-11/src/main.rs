@@ -1,4 +1,3 @@
-use num::Integer;
 use std::collections::VecDeque;
 #[allow(clippy::wildcard_imports)]
 use utils::*;
@@ -181,13 +180,13 @@ fn part1(input: &InputData) -> AocResult<usize> {
     const ROUNDS: usize = 20;
     let mut monkeys: Vec<Monkey> = input.monkeys.to_vec();
     let mut inspected: Vec<usize> = vec![0; monkeys.len()];
-    let test_lcm: u64 = input.monkeys.iter().fold(1, |acc, m| acc.lcm(&m.test));
+    let item_reduce: u64 = input.monkeys.iter().map(|m| m.test).product();
 
     for _round in 0..ROUNDS {
         for turn in 0..monkeys.len() {
             while let Some(item) = monkeys[turn].inspect(Relief(3)) {
                 let recipient = monkeys[turn].throw(item);
-                monkeys[recipient].catch(item.reduce(test_lcm));
+                monkeys[recipient].catch(item.reduce(item_reduce));
                 inspected[turn] += 1;
             }
         }
@@ -201,13 +200,13 @@ fn part2(input: &InputData) -> AocResult<usize> {
     const ROUNDS: usize = 10_000;
     let mut monkeys: Vec<Monkey> = input.monkeys.to_vec();
     let mut inspected: Vec<usize> = vec![0; monkeys.len()];
-    let test_lcm: u64 = input.monkeys.iter().fold(1, |acc, m| acc.lcm(&m.test));
+    let item_reduce: u64 = input.monkeys.iter().map(|m| m.test).product();
 
     for _round in 0..ROUNDS {
         for turn in 0..monkeys.len() {
             while let Some(item) = monkeys[turn].inspect(Relief(1)) {
                 let recipient = monkeys[turn].throw(item);
-                monkeys[recipient].catch(item.reduce(test_lcm));
+                monkeys[recipient].catch(item.reduce(item_reduce));
                 inspected[turn] += 1;
             }
         }
