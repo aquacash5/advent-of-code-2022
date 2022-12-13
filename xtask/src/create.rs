@@ -70,7 +70,8 @@ fn create_new<P: AsRef<Path>>(path: P) -> io::Result<File> {
 /// in the `~/.adventofcode` file.
 pub fn generate_day(day: u64) -> anyhow::Result<()> {
     let day_folder = format!("day-{day}");
-    let location = Path::new(env!("CARGO_MANIFEST_DIR")).with_file_name(day_folder);
+    let metadata = cargo_metadata::MetadataCommand::new().no_deps().exec()?;
+    let location = metadata.workspace_root.as_std_path().join(day_folder);
     debug!("New folder location: {}", location.display());
     fs::create_dir_all(location.join("src"))?;
     if let Ok(mut file) = create_new(location.join("Cargo.toml")) {

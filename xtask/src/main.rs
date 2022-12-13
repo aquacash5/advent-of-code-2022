@@ -1,9 +1,8 @@
 mod create;
 
-use cargo::{core::Workspace, Config};
 use clap::{builder::PossibleValue, Parser, ValueEnum};
 use log::trace;
-use std::{fmt::Display, path::Path};
+use std::fmt::Display;
 use xshell::{cmd, Shell};
 
 use crate::create::{generate_day, generate_input};
@@ -114,8 +113,11 @@ fn main() -> anyhow::Result<()> {
         }
         Cli::Day { day, part } => {
             let package = format!("day-{day}");
-            let path = Path::new(env!("CARGO_MANIFEST_DIR"))
-                .with_file_name(&package)
+            let metadata = cargo_metadata::MetadataCommand::new().no_deps().exec()?;
+            let path = metadata
+                .workspace_root
+                .as_std_path()
+                .join(&package)
                 .join("input.txt");
             if !path.exists() {
                 generate_input(day, dbg!(&path))?;
@@ -144,21 +146,17 @@ fn main() -> anyhow::Result<()> {
 
 /// Tests all of the Advent of Code projects in the workspace
 fn test_all(sh: &Shell) -> anyhow::Result<()> {
-    // We expect CARGO_MANIFEST_DIR to be the directory of the
-    // xtask package therefor calling `with_file_name` we replace
-    // `.../xtask` with `.../Cargo.toml`. This is expected to be
-    // the manifest of the workspace.
-    let workspace_manifest = Path::new(env!("CARGO_MANIFEST_DIR")).with_file_name("Cargo.toml");
-    let system_config = Config::default()?;
-    Workspace::new(&workspace_manifest, &system_config)?
-        .members()
-        .filter(|p| p.name().starts_with("day"))
+    let metadata = cargo_metadata::MetadataCommand::new().no_deps().exec()?;
+    metadata
+        .workspace_packages()
+        .iter()
+        .filter(|p| p.name.starts_with("day"))
         .for_each(|p| {
             sh.cmd("cargo")
                 .arg("test")
                 .arg("-q")
                 .arg("-p")
-                .arg(p.name())
+                .arg(p.name.clone())
                 .run()
                 .unwrap();
         });
