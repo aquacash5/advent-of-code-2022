@@ -11,13 +11,6 @@ enum Packet {
 }
 
 impl Packet {
-    fn to_list(&self) -> Self {
-        match self {
-            Self::List(_) => self.clone(),
-            Self::Value(_) => Self::List(vec![self.clone()]),
-        }
-    }
-
     fn parse(input: &str) -> ParseResult<Packet> {
         use nom::{
             branch::alt,
@@ -42,31 +35,24 @@ impl Packet {
 
 impl PartialEq for Packet {
     fn eq(&self, other: &Self) -> bool {
-        self.partial_cmp(other) == Some(Ordering::Equal)
+        self.cmp(other) == Ordering::Equal
     }
 }
 
 impl PartialOrd for Packet {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        match (self, other) {
-            (Self::Value(l), Self::Value(r)) => l.partial_cmp(r),
-            (Self::List(l), Self::List(r)) => {
-                let alternate = l.len().partial_cmp(&r.len());
-                let l_i = l.iter();
-                let r_i = r.iter();
-                l_i.zip(r_i)
-                    .find(|(l, r)| l != r)
-                    .and_then(|(l, r)| l.partial_cmp(r))
-                    .or(alternate)
-            }
-            _ => self.to_list().partial_cmp(&other.to_list()),
-        }
+        Some(self.cmp(other))
     }
 }
 
 impl Ord for Packet {
     fn cmp(&self, other: &Self) -> Ordering {
-        self.partial_cmp(other).unwrap_or(Ordering::Greater)
+        match (self, other) {
+            (Self::Value(l), Self::Value(r)) => l.cmp(r),
+            (Self::List(l), Self::List(r)) => l.cmp(r),
+            (Self::Value(l), Self::List(_)) => Self::List(vec![Self::Value(*l)]).cmp(other),
+            (Self::List(_), Self::Value(r)) => self.cmp(&Self::List(vec![Self::Value(*r)])),
+        }
     }
 }
 
@@ -107,26 +93,16 @@ fn part2(input: &InputData) -> AocResult<usize> {
         Packet::List(vec![Packet::List(vec![Packet::Value(2)])]),
         Packet::List(vec![Packet::List(vec![Packet::Value(6)])]),
     ];
-    let mut packets = input
+    Ok(input
         .packet_pairs
         .iter()
         .flat_map(|(l, r)| [l, r])
         .chain(divider_packets.iter())
-        .collect_vec();
-    packets.sort();
-    let div_2 = packets
-        .iter()
+        .sorted()
         .enumerate()
-        .find(|(_, &p)| *p == divider_packets[0])
+        .filter(|(_, p)| divider_packets.contains(p))
         .map(|(i, _)| i + 1)
-        .unwrap_or_default();
-    let div_6 = packets
-        .iter()
-        .enumerate()
-        .find(|(_, &p)| *p == divider_packets[1])
-        .map(|(i, _)| i + 1)
-        .unwrap_or_default();
-    Ok(div_2 * div_6)
+        .product())
 }
 
 aoc_main!(parse, part1, part2);
