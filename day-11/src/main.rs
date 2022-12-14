@@ -9,17 +9,17 @@ enum Operand {
 }
 
 impl Operand {
-    fn parse(input: &str) -> ParseResult<Operand> {
+    fn parse(input: &str) -> ParseResult<Self> {
         use nom::{branch::alt, bytes::complete::tag, character::complete::u64, combinator::map};
-        let old = map(tag("old"), |_| Operand::Old);
-        let const_ = map(u64, Operand::Const);
+        let old = map(tag("old"), |_| Self::Old);
+        let const_ = map(u64, Self::Const);
         alt((old, const_))(input)
     }
 
-    fn value(&self, n: u64) -> u64 {
+    const fn value(&self, n: u64) -> u64 {
         match self {
-            Operand::Const(i) => *i,
-            Operand::Old => n,
+            Self::Const(i) => *i,
+            Self::Old => n,
         }
     }
 }
@@ -31,17 +31,17 @@ enum Operator {
 }
 
 impl Operator {
-    fn parse(input: &str) -> ParseResult<Operator> {
+    fn parse(input: &str) -> ParseResult<Self> {
         use nom::{branch::alt, bytes::complete::tag, combinator::map};
-        let add = map(tag(" + "), |_| Operator::Add);
-        let mul = map(tag(" * "), |_| Operator::Multiply);
+        let add = map(tag(" + "), |_| Self::Add);
+        let mul = map(tag(" * "), |_| Self::Multiply);
         alt((add, mul))(input)
     }
 
-    fn operate(&self, i: u64, j: u64) -> u64 {
+    const fn operate(self, i: u64, j: u64) -> u64 {
         match self {
-            Operator::Add => i + j,
-            Operator::Multiply => i * j,
+            Self::Add => i + j,
+            Self::Multiply => i * j,
         }
     }
 }
@@ -50,7 +50,7 @@ impl Operator {
 struct Relief(u64);
 
 impl Relief {
-    fn relieve(&self, item: &Item) -> Item {
+    const fn relieve(self, item: Item) -> Item {
         Item(item.0 / self.0)
     }
 }
@@ -63,11 +63,11 @@ struct Operation {
 }
 
 impl Operation {
-    fn parse(input: &str) -> ParseResult<Operation> {
+    fn parse(input: &str) -> ParseResult<Self> {
         use nom::{combinator::map, sequence::tuple};
         map(
             tuple((Operand::parse, Operator::parse, Operand::parse)),
-            |(operand1, operator, operand2)| Operation {
+            |(operand1, operator, operand2)| Self {
                 operator,
                 operand1,
                 operand2,
@@ -75,7 +75,7 @@ impl Operation {
         )(input)
     }
 
-    fn operate(&self, n: u64) -> u64 {
+    const fn operate(&self, n: u64) -> u64 {
         self.operator
             .operate(self.operand1.value(n), self.operand2.value(n))
     }
@@ -85,18 +85,18 @@ impl Operation {
 struct Item(u64);
 
 impl Item {
-    fn parse(input: &str) -> ParseResult<Item> {
+    fn parse(input: &str) -> ParseResult<Self> {
         use nom::{character::complete::u64, combinator::map};
 
-        map(u64, Item)(input)
+        map(u64, Self)(input)
     }
 
-    fn inspect(&self, op: &Operation) -> Item {
-        Item(op.operate(self.0))
+    const fn inspect(self, op: &Operation) -> Self {
+        Self(op.operate(self.0))
     }
 
-    fn reduce(&self, lcm: u64) -> Item {
-        Item(self.0 % lcm)
+    const fn reduce(self, amount: u64) -> Self {
+        Self(self.0 % amount)
     }
 }
 
@@ -110,7 +110,7 @@ struct Monkey {
 }
 
 impl Monkey {
-    fn parse(input: &str) -> ParseResult<Monkey> {
+    fn parse(input: &str) -> ParseResult<Self> {
         use nom::{
             bytes::complete::tag,
             character::complete::{line_ending, u64},
@@ -134,7 +134,7 @@ impl Monkey {
         let false_test = delimited(tag("    If false: throw to monkey "), u64, line_ending);
         map(
             tuple((heading, items, operation, test, true_test, false_test)),
-            |(_, items, operation, test, true_test, false_test)| Monkey {
+            |(_, items, operation, test, true_test, false_test)| Self {
                 items,
                 operation,
                 test,
@@ -148,7 +148,7 @@ impl Monkey {
         self.items.push_back(n);
     }
 
-    fn throw(&self, item: Item) -> usize {
+    const fn throw(&self, item: Item) -> usize {
         if item.0 % self.test == 0 {
             self.true_test
         } else {
@@ -159,7 +159,7 @@ impl Monkey {
     fn inspect(&mut self, relief: Relief) -> Option<Item> {
         let item = self.items.pop_front()?;
         let item = item.inspect(&self.operation);
-        Some(relief.relieve(&item))
+        Some(relief.relieve(item))
     }
 }
 
@@ -178,7 +178,7 @@ fn parse(input: &str) -> ParseResult<InputData> {
 #[allow(clippy::unnecessary_wraps)]
 fn part1(input: &InputData) -> AocResult<usize> {
     const ROUNDS: usize = 20;
-    let mut monkeys: Vec<Monkey> = input.monkeys.to_vec();
+    let mut monkeys: Vec<Monkey> = input.monkeys.clone();
     let mut inspected: Vec<usize> = vec![0; monkeys.len()];
     let item_reduce: u64 = input.monkeys.iter().map(|m| m.test).product();
 
@@ -198,7 +198,7 @@ fn part1(input: &InputData) -> AocResult<usize> {
 #[allow(clippy::unnecessary_wraps)]
 fn part2(input: &InputData) -> AocResult<usize> {
     const ROUNDS: usize = 10_000;
-    let mut monkeys: Vec<Monkey> = input.monkeys.to_vec();
+    let mut monkeys: Vec<Monkey> = input.monkeys.clone();
     let mut inspected: Vec<usize> = vec![0; monkeys.len()];
     let item_reduce: u64 = input.monkeys.iter().map(|m| m.test).product();
 

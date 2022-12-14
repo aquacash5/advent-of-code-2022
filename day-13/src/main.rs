@@ -6,12 +6,12 @@ use utils::*;
 
 #[derive(Debug, Clone, Eq)]
 enum Packet {
-    List(Vec<Packet>),
+    List(Vec<Self>),
     Value(i32),
 }
 
 impl Packet {
-    fn parse(input: &str) -> ParseResult<Packet> {
+    fn parse(input: &str) -> ParseResult<Self> {
         use nom::{
             branch::alt,
             character::complete::{char, i32},
@@ -23,7 +23,7 @@ impl Packet {
         let list = map(
             delimited(
                 char('['),
-                separated_list0(char(','), Packet::parse),
+                separated_list0(char(','), Self::parse),
                 char(']'),
             ),
             Self::List,
