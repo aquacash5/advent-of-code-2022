@@ -1,4 +1,5 @@
 use anyhow::Context;
+use cargo_metadata::Metadata;
 use indoc::indoc;
 use log::debug;
 use reqwest::blocking as req;
@@ -68,9 +69,8 @@ fn create_new<P: AsRef<Path>>(path: P) -> io::Result<File> {
 /// Scaffolds the project files for the new day of Advent of Code.
 /// Then, we try to download the input file using the session key
 /// in the `~/.adventofcode` file.
-pub fn generate_day(day: u64) -> anyhow::Result<()> {
+pub fn generate_day(day: u64, metadata: &Metadata) -> anyhow::Result<()> {
     let day_folder = format!("day-{day}");
-    let metadata = cargo_metadata::MetadataCommand::new().no_deps().exec()?;
     let location = metadata.workspace_root.as_std_path().join(day_folder);
     debug!("New folder location: {}", location.display());
     fs::create_dir_all(location.join("src"))?;

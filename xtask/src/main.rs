@@ -1,5 +1,6 @@
 mod create;
 
+use cargo_metadata::{Metadata, MetadataCommand};
 use clap::{builder::PossibleValue, Parser, ValueEnum};
 use log::trace;
 use std::fmt::Display;
@@ -98,6 +99,7 @@ fn main() -> anyhow::Result<()> {
     env_logger::init();
     let cli = Cli::parse();
     trace!("CLI arguments: {cli:?}");
+    let metadata = MetadataCommand::new().no_deps().exec()?;
 
     let sh = Shell::new()?;
     match cli {
@@ -109,18 +111,17 @@ fn main() -> anyhow::Result<()> {
             .run()?;
         }
         Cli::Create { day } => {
-            generate_day(day)?;
+            generate_day(day, &metadata)?;
         }
         Cli::Day { day, part } => {
             let package = format!("day-{day}");
-            let metadata = cargo_metadata::MetadataCommand::new().no_deps().exec()?;
             let path = metadata
                 .workspace_root
                 .as_std_path()
                 .join(&package)
                 .join("input.txt");
             if !path.exists() {
-                generate_input(day, dbg!(&path))?;
+                generate_input(day, &path)?;
             }
             let part = format!("{part}");
             cmd!(
@@ -137,7 +138,7 @@ fn main() -> anyhow::Result<()> {
             cmd!(sh, "cargo test -q --package {day}").run()?;
         }
         Cli::TestAll => {
-            test_all(&sh)?;
+            test_all(&sh, &metadata)?;
         }
     }
 
@@ -145,20 +146,18 @@ fn main() -> anyhow::Result<()> {
 }
 
 /// Tests all of the Advent of Code projects in the workspace
-fn test_all(sh: &Shell) -> anyhow::Result<()> {
-    let metadata = cargo_metadata::MetadataCommand::new().no_deps().exec()?;
+fn test_all(sh: &Shell, metadata: &Metadata) -> anyhow::Result<()> {
     metadata
         .workspace_packages()
         .iter()
         .filter(|p| p.name.starts_with("day"))
-        .for_each(|p| {
+        .try_for_each(|p| {
             sh.cmd("cargo")
                 .arg("test")
                 .arg("-q")
                 .arg("-p")
                 .arg(p.name.clone())
                 .run()
-                .unwrap();
-        });
-    Ok(())
+                .map_err(anyhow::Error::from)
+        })
 }
