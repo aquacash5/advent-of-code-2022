@@ -152,11 +152,8 @@ fn test_all(sh: &Shell, metadata: &Metadata) -> anyhow::Result<()> {
         .iter()
         .filter(|p| p.name.starts_with("day"))
         .try_for_each(|p| {
-            sh.cmd("cargo")
-                .arg("test")
-                .arg("-q")
-                .arg("-p")
-                .arg(p.name.clone())
+            let name = p.name.clone();
+            cmd!(sh, "cargo test -q -p {name}")
                 .run()
                 .map_err(anyhow::Error::from)
         })
